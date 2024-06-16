@@ -1,0 +1,17 @@
+{
+    "player": {
+        "discord_nickname": "it's_deyka#3228",
+        "dst_nickname": "it's_deyka"
+    },
+    "items": [
+        {
+            "name": "Мешок крампуса",
+            "id": "krampus_sack"
+        }
+    ],
+    "status": "executed",
+    "created_at": "2022-12-30 12:54:06.803000+00:00",
+    "approved_at": "2023-01-02 10:13:16.342000+00:00",
+    "executed_at": "2023-01-02 10:29:09.516000+00:00",
+    "path": "Оазис Кошмаров_2022-12-30 08:17:36.936000+00:00"
+}
