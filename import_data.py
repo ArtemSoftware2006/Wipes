@@ -1,40 +1,44 @@
 import os
 import json
 import mysql.connector
+import config
+
+config_path = './db_config.json'
+database_config = config.Config(config_path)
 
 connection = mysql.connector.connect(
-    host="localhost",
-    user='root',
-    password='root',
-    database='vapes'
+    host = database_config.connection.host,
+    user = database_config.connection.user,
+    password = database_config.connection.password,
+    database = database_config.connection.database
 )
 
 cursor = connection.cursor(buffered=True)
-config_path = './db_config.json'
-config = {}
+
+config_data = {}
 
 def load_config():
-    global config
+    global config_data
     with open(config_path, 'r') as f:
-        config = json.load(f)
+        config_data = json.load(f)
 
 def reset_db():
     cursor.execute("SET FOREIGN_KEY_CHECKS = 0;")
-    cursor.execute(f"TRUNCATE TABLE {config['server']['name']};")
-    cursor.execute(f"TRUNCATE TABLE {config['player']['name']};")
-    cursor.execute(f"TRUNCATE TABLE {config['wipe']['name']};")
-    cursor.execute(f"TRUNCATE TABLE {config['discord_account']['name']};")
-    cursor.execute(f"TRUNCATE TABLE {config['request']['name']};")
-    cursor.execute(f"TRUNCATE TABLE {config['thing']['name']};")
-    cursor.execute(f"TRUNCATE TABLE {config['request_status']['name']};")
-    cursor.execute(f"TRUNCATE TABLE {config['thing_in_request']['name']};")
+    cursor.execute(f"TRUNCATE TABLE {database_config.server.table_name};")
+    cursor.execute(f"TRUNCATE TABLE {database_config.player.table_name};")
+    cursor.execute(f"TRUNCATE TABLE {database_config.thing.table_name};")
+    cursor.execute(f"TRUNCATE TABLE {database_config.thing_in_request.table_name};")
+    cursor.execute(f"TRUNCATE TABLE {database_config.discord_account.table_name};")
+    cursor.execute(f"TRUNCATE TABLE {database_config.request.table_name};")
+    cursor.execute(f"TRUNCATE TABLE {database_config.request_status.table_name};")
+    cursor.execute(f"TRUNCATE TABLE {database_config.wipe.table_name};")
     cursor.execute("SET FOREIGN_KEY_CHECKS = 1;")
     
     connection.commit()
     
 def add_default_value(): 
      cursor.execute(f"""
-                    INSERT INTO {config['server']['name']}({config['server']['columns']['name']}) VALUES
+                    INSERT INTO {database_config.server.table_name}({database_config.server.columns['name']}) VALUES
                     ('Оазис Кошмаров'),
                     ('Деревушка Керивэлл')
                     """)
@@ -43,7 +47,7 @@ def add_default_value():
 def insert_discord_data(discord_data):
     discord_nickname = discord_data['discord_nickname']
     query = f"""
-            INSERT INTO {config['discord_account']['name']} ({config['discord_account']['columns']['discord_name']}) 
+            INSERT INTO {config_data['discord_account']['name']} ({config_data['discord_account']['columns']['discord_name']}) 
             VALUES (%s)"""
     cursor.execute(query, (discord_nickname,))
         
@@ -52,18 +56,18 @@ def insert_discord_data(discord_data):
 def insert_vape_data(vape_data):
     
     query = f"""
-            SELECT {config['server']['columns']['id']} 
-            FROM {config['server']['name']} 
-            WHERE {config['server']['columns']['name']} = %s"""
+            SELECT {database_config.server.columns['id']} 
+            FROM {database_config.server.table_name} 
+            WHERE {database_config.server.columns['name']} = %s"""
     cursor.execute(query, (vape_data['server_name'],))
     id_server = cursor.fetchone()
                 
     cursor.execute(
         f"""
-        INSERT INTO {config['wipe']['name']} (
-            {config['wipe']['columns']['started_at']}, 
-            {config['wipe']['columns']['stoped_at']}, 
-            {config['wipe']['columns']['server_id']}
+        INSERT INTO {database_config.wipe.table_name} (
+            {database_config.wipe.columns['started_at']}, 
+            {database_config.wipe.columns['stoped_at']}, 
+            {database_config.wipe.columns['server_id']}
         ) 
         VALUES (%s, %s, %s)
         """, 
@@ -75,9 +79,9 @@ def insert_vape_data(vape_data):
     
 def insert_player_data(player_data):
     query = f"""
-            INSERT INTO {config['player']['name']} (
-                {config['player']['columns']['dst_nickname']}, 
-                {config['player']['columns']['discord_id']}
+            INSERT INTO {database_config.player.table_name} (
+                {database_config.player.columns['dst_nickname']}, 
+                {database_config.player.columns['discord_id']}
             ) 
             VALUES (%s, %s)
             """
@@ -88,13 +92,13 @@ def insert_player_data(player_data):
     
 def insert_claim_data(claim_data):
     query = f"""
-            INSERT INTO {config['request']['name']}(
-                {config['request']['columns']['created_at']}, 
-                {config['request']['columns']['approved_at']}, 
-                {config['request']['columns']['executed_at']}, 
-                {config['request']['columns']['request_status']}, 
-                {config['request']['columns']['wipe_id']}, 
-                {config['request']['columns']['player_id']}
+            INSERT INTO {database_config.request.table_name}(
+                {database_config.request.columns['created_at']}, 
+                {database_config.request.columns['approved_at']}, 
+                {database_config.request.columns['executed_at']}, 
+                {database_config.request.columns['request_status']}, 
+                {database_config.request.columns['wipe_id']}, 
+                {database_config.request.columns['player_id']}
             ) 
             VALUES (%s, %s, %s, %s, %s, %s)
             """
@@ -114,8 +118,8 @@ claim_statuses = {}
 def get_request_status(status):
     if not claim_statuses.get(status):
         query = f"""
-            INSERT INTO {config['request_status']['name']}(
-                {config['request_status']['columns']['status']}
+            INSERT INTO {database_config.request_status.table_name}(
+                {database_config.request_status.columns['status']}
             ) 
             VALUES (%s)
         """
@@ -130,9 +134,9 @@ thing_dict = {}
 def insert_thing_data(thing_data):
     if not thing_dict.get((thing_data['id'])):
         query = f"""
-        INSERT INTO {config['thing']['name']}(
-            {config['thing']['columns']['name']}, 
-            {config['thing']['columns']['prefab']}
+        INSERT INTO {database_config.thing.table_name}(
+            {database_config.thing.columns['name']}, 
+            {database_config.thing.columns['prefab']}
         ) 
         VALUES (%s, %s)"""
         
@@ -145,15 +149,13 @@ def insert_thing_data(thing_data):
 
 def insert_thing_claim_data(thing_claim_data):
     query = f"""
-            INSERT INTO {config['thing_in_request']['name']}(
-                {config['thing_in_request']['columns']['claim_id']}, 
-                {config['thing_in_request']['columns']['thing_id']}) 
+            INSERT INTO {database_config.thing_in_request.table_name}(
+                {database_config.thing_in_request.columns['claim_id']}, 
+                {database_config.thing_in_request.columns['thing_id']}) 
             VALUES (%s, %s)"""
     cursor.execute(query, (thing_claim_data['Claims_id_claim'], thing_claim_data['Things_id_thing'],))
     connection.commit()       
     
-    
-
     
 def main():   
     
@@ -162,7 +164,7 @@ def main():
         reset_db()
         add_default_value()
         
-        for source_path in config['source']:
+        for source_path in config_data['source']:
 
             # Переход по всем папкам с вайпами
             for wipe_folder in os.listdir(source_path):

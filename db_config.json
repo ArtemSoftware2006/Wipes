@@ -1,4 +1,10 @@
 {
+    "connection" : {
+        "host" : "localhost",
+        "user" : "root",
+        "password" : "root",
+        "database" : "vapes"
+    },
     "source" : [
         "./data/wipe_list_oasis",
         "./data/wipe_list_village/wipe_list"
