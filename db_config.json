@@ -1,0 +1,72 @@
+{
+    "source" : [
+        "./data/wipe_list_oasis",
+        "./data/wipe_list_village/wipe_list"
+    ],
+    "server": {
+        "name" : "Servers",
+        "columns" : {
+            "id" : "id_server",
+            "name" : "name"
+        }
+    },
+    "wipe" : {
+        "name" : "Vapes",
+        "columns" : {
+            "id" : "id_vape",
+            "started_at" : "started_at",
+            "stoped_at" : "stoped_at",
+            "server_id" : "id_server"
+        }
+    },
+    "player": {
+        "name" : "Players",
+        "columns" : {
+            "id" : "id_player",
+            "discord_id" : "id_discord_accounts",
+            "dst_nickname" : "dst_nickname"
+        }
+    },
+    "discord_account" : {
+        "name" : "Discord_Accounts",
+        "columns" : {
+            "id" : "id_discord",
+            "discord_name" : "login"
+        }
+    },
+    "request" : {
+        "name" : "Claims",
+        "columns" : {
+            "id" : "id_claim",
+            "approved_at" : "approved_at",
+            "executed_at" : "executed_at",
+            "created_at" : "created_at",
+            "wipe_id" : "Vapes_id_vape",
+            "request_status" : "ClaimStatuses_id_claim_status",
+            "player_id" : "Players_id_player"
+        }
+    },
+    "thing" : {
+        "name" : "Things",
+        "columns" : {
+            "id" : "id_thing",
+            "name" : "name",
+            "prefab" : "prefab"
+        }
+    },
+    "request_status" : {
+        "name" : "Claim_Statuses",
+        "columns" : {
+            "id" : "id_claim_status",
+            "status" : "name"
+        }
+    },
+    "thing_in_request" : {
+        "name" : "Claims_has_Things",
+        "columns" : {
+            "id" : "id_Claims_has_Things",
+            "claim_id" : "Claims_id_claim",
+            "thing_id" : "Things_id_thing"
+        }
+    }
+}
