@@ -45,11 +45,10 @@ def add_default_value():
      connection.commit()
      
 def insert_discord_data(discord_data):
-    discord_nickname = discord_data['discord_nickname']
     query = f"""
             INSERT INTO {config_data['discord_account']['name']} ({config_data['discord_account']['columns']['discord_name']}) 
             VALUES (%s)"""
-    cursor.execute(query, (discord_nickname,))
+    cursor.execute(query, (discord_data['discord_nickname'],))
         
     return cursor.lastrowid
 
@@ -185,8 +184,12 @@ def main():
                             claim_data = json.load(f)
 
                         player = claim_data['player']
+                        
+                        discord_nickname ={
+                            'discord_nickname' : player['discord_nickname']
+                        }
                                         
-                        id_discord_accounts = insert_discord_data(player)
+                        id_discord_accounts = insert_discord_data(discord_nickname)
                         dst_nickname = player['dst_nickname']
                         
                         player_data = {
