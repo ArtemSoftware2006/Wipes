@@ -43,14 +43,20 @@ def add_default_value():
                     ('Деревушка Керивэлл')
                     """)
      connection.commit()
-     
+   
+discord_acc_dict = {}     
 def insert_discord_data(discord_data):
-    query = f"""
-            INSERT INTO {config_data['discord_account']['name']} ({config_data['discord_account']['columns']['discord_name']}) 
-            VALUES (%s)"""
-    cursor.execute(query, (discord_data['discord_nickname'],))
+    if not discord_acc_dict.get(discord_data['discord_nickname']):
+        query = f"""
+                INSERT INTO {config_data['discord_account']['name']} ({config_data['discord_account']['columns']['discord_name']}) 
+                VALUES (%s)"""
+        cursor.execute(query, (discord_data['discord_nickname'],))
         
-    return cursor.lastrowid
+        discord_acc_dict[discord_data['discord_nickname']] = cursor.lastrowid
+            
+        return cursor.lastrowid
+    else:
+        return discord_acc_dict[discord_data['discord_nickname']] 
 
 def insert_vape_data(vape_data):
     
@@ -76,18 +82,25 @@ def insert_vape_data(vape_data):
     
     return cursor.lastrowid
     
+players_dict = {}
 def insert_player_data(player_data):
-    query = f"""
-            INSERT INTO {database_config.player.table_name} (
-                {database_config.player.columns['dst_nickname']}, 
-                {database_config.player.columns['discord_id']}
-            ) 
-            VALUES (%s, %s)
-            """
-    cursor.execute(query, (player_data['dst_nickname'], player_data['id_discord_accounts'],))
-    connection.commit()
-    
-    return cursor.lastrowid
+    if not players_dict.get(player_data['dst_nickname']):
+        query = f"""
+                INSERT INTO {database_config.player.table_name} (
+                    {database_config.player.columns['dst_nickname']}, 
+                    {database_config.player.columns['discord_id']}
+                ) 
+                VALUES (%s, %s)
+                """
+        cursor.execute(query, (player_data['dst_nickname'], player_data['id_discord_accounts'],))
+        connection.commit()
+        
+        players_dict[player_data['dst_nickname']] = cursor.lastrowid
+        
+        return cursor.lastrowid
+
+    else:
+        return players_dict[player_data['dst_nickname']]
     
 def insert_claim_data(claim_data):
     query = f"""
@@ -173,9 +186,7 @@ def main():
                     info_file_path = os.path.join(wipe_folder_path, 'wipe.json')
                     with open(info_file_path, 'r') as f:
                         wipe_data = json.load(f)
-                    
                     id_vape = insert_vape_data(wipe_data)
-
                     # Чтение файлов запросов
                     claims_folder_path = os.path.join(wipe_folder_path, 'claims')
                     for claim_file in os.listdir(claims_folder_path):
