@@ -99,3 +99,16 @@ VIEW `top_claims_on_servers` AS
 
 -----------------------------
 
+CREATE 
+    ALGORITHM = UNDEFINED 
+    DEFINER = `root`@`localhost` 
+    SQL SECURITY DEFINER
+VIEW `top_things` AS
+    SELECT 
+        `th`.`name` AS `name`,
+        COUNT(`cl_th`.`id_Claims_has_Things`) AS `thing_count`
+    FROM
+        (`Claims_has_Things` `cl_th`
+        JOIN `Things` `th` ON ((`th`.`id_thing` = `cl_th`.`Things_id_thing`)))
+    GROUP BY `cl_th`.`Things_id_thing`
+    ORDER BY COUNT(`cl_th`.`id_Claims_has_Things`) DESC
